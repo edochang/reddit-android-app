@@ -8,9 +8,11 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import edu.cs371m.reddit.databinding.ActionBarBinding
@@ -24,6 +26,8 @@ class MainActivity : AppCompatActivity() {
         var globalDebug = false
         lateinit var jsonAww100: String
         lateinit var subreddit1: String
+        val favoriteDrawable = R.drawable.ic_favorite_black_24dp
+        val unfavoriteDrawable = R.drawable.ic_favorite_border_black_24dp
     }
     private var actionBarBinding: ActionBarBinding? = null
     private val viewModel: MainViewModel by viewModels()
@@ -62,14 +66,54 @@ class MainActivity : AppCompatActivity() {
     }
     private fun actionBarTitleLaunchSubreddit() {
         // XXX Write me actionBarBinding, safeNavigate
+        actionBarBinding?.let {
+            it.actionTitle.setOnClickListener() {
+                val direction = HomeFragmentDirections.actionHomeFragmentToSubreddits()
+                navController.safeNavigate(direction)
+            }
+        }
     }
     private fun actionBarLaunchFavorites() {
         // XXX Write me actionBarBinding, safeNavigate
+        actionBarBinding?.let {
+            it.actionFavorite.setOnClickListener() {
+                val direction = HomeFragmentDirections.actionHomeFragmentToFavorites()
+                navController.safeNavigate(direction)
+            }
+        }
     }
 
     // XXX check out addTextChangedListener
     private fun actionBarSearch() {
         // XXX Write me
+        actionBarBinding?.let { actionBarBinding ->
+            actionBarBinding.actionSearch.addTextChangedListener(
+                object: TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {
+                        // not used
+                    }
+
+                    override fun onTextChanged(
+                        s: CharSequence,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {
+                        if (s.isEmpty()) hideKeyboard()
+                        viewModel.setSearchTerm(s.toString())
+                    }
+
+                    override fun afterTextChanged(s: Editable?) {
+                        // not used
+                    }
+                }
+            )
+        }
     }
 
     private fun initDebug() {
@@ -87,6 +131,18 @@ class MainActivity : AppCompatActivity() {
     }
     private fun initTitleObservers() {
         // Observe title changes
+        viewModel.setTitle("r/aww")
+        viewModel.observeTitle().observe(this) {
+            actionBarBinding?.let { actionBarBinding ->
+                actionBarBinding.actionTitle.text = it
+            }
+        }
+
+        actionBarBinding?.let {
+            it.actionTitle.setOnClickListener() {
+                actionBarTitleLaunchSubreddit()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,7 +161,9 @@ class MainActivity : AppCompatActivity() {
         actionBarSearch()
 
         // Set up our nav graph
-        navController = findNavController(R.id.main_frame)
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.main_frame) as NavHostFragment
+        navController = navHostFragment.navController
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         // If we have a toolbar (not actionbar) we don't need to override
         // onSupportNavigateUp().

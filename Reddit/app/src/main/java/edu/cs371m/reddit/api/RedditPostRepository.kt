@@ -13,6 +13,9 @@ class RedditPostRepository(private val redditApi: RedditApi) {
 
     private fun unpackPosts(response: RedditApi.ListingResponse): List<RedditPost> {
         // XXX Write me.
+        return List(response.data.children.size) { index ->
+            response.data.children[index].data
+        }
     }
 
     suspend fun getPosts(subreddit: String): List<RedditPost> {
@@ -23,6 +26,7 @@ class RedditPostRepository(private val redditApi: RedditApi) {
                 RedditApi.ListingResponse::class.java)
         } else {
             // XXX Write me.
+            return unpackPosts(redditApi.getPosts(subreddit))
         }
         return unpackPosts(response!!)
     }
@@ -35,6 +39,7 @@ class RedditPostRepository(private val redditApi: RedditApi) {
                 RedditApi.ListingResponse::class.java)
         } else {
             // XXX Write me.
+            return unpackPosts(redditApi.getSubreddits())
         }
         return unpackPosts(response!!)
     }

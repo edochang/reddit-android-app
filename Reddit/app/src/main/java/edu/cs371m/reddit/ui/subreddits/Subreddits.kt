@@ -14,11 +14,29 @@ import edu.cs371m.reddit.ui.MainViewModel
 
 class Subreddits : Fragment(R.layout.fragment_rv) {
     // XXX initialize viewModel
+    private val viewModel: MainViewModel by activityViewModels()
     private var _binding: FragmentRvBinding? = null
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     // XXX Write me, onViewCreated
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(javaClass.simpleName, "onViewCreated")
+        _binding = FragmentRvBinding.bind(view)
+        binding.swipeRefreshLayout.isEnabled = false
+        viewModel.setTitle("Subreddits")
+        viewModel.hideActionBarFavorites()
+
+        val subredditListAdapter = SubredditListAdapter(viewModel, findNavController())
+
+        // XXX Write me, observe posts
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.layoutManager = layoutManager
+        binding.recyclerView.adapter = subredditListAdapter
+        viewModel.observeLiveSubreddits().observe(viewLifecycleOwner) {
+            subredditListAdapter.submitList(it)
+        }
+    }
 
     override fun onDestroyView() {
         _binding = null

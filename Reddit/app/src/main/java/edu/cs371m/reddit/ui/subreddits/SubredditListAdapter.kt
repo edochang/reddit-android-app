@@ -1,5 +1,6 @@
 package edu.cs371m.reddit.ui.subreddits
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.navigation.NavController
@@ -21,10 +22,36 @@ class SubredditListAdapter(private val viewModel: MainViewModel,
 
     // ViewHolder pattern
     inner class VH(val rowSubredditBinding: RowSubredditBinding)
-        : RecyclerView.ViewHolder(rowSubredditBinding.root)
+        : RecyclerView.ViewHolder(rowSubredditBinding.root) {
 
         // XXX Write me
+        //init {}
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val rowBinding = RowSubredditBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false)
+        return VH(rowBinding)
     }
     override fun onBindViewHolder(holder: VH, position: Int) {
-    // XXX Write me
+        // XXX Write me
+        val subreddit = getItem(position)
+        val rowBinding = holder.rowSubredditBinding
+        holder.itemView.setOnClickListener() {
+            Log.d(javaClass.simpleName, "subreddit post data: $subreddit")
+            val subredditName = subreddit.displayName.toString()
+            //val title = String.format("r/%s", subredditName)
+            //viewModel.setTitle(title)
+            viewModel.setSubreddit(subredditName)
+            navController.navigateUp()
+        }
+
+        subreddit.iconURL?.let {
+            Glide.glideFetch(subreddit.iconURL, "", rowBinding.subRowPic)
+        }
+        rowBinding.subRowHeading.text = subreddit.displayName
+        rowBinding.subRowDetails.text = subreddit.publicDescription
+    }
 }

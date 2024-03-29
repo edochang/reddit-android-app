@@ -1,12 +1,13 @@
 package edu.cs371m.reddit.ui
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import edu.cs371m.reddit.R
+import edu.cs371m.reddit.MainActivity
 import edu.cs371m.reddit.api.RedditPost
 import edu.cs371m.reddit.databinding.RowPostBinding
 import edu.cs371m.reddit.glide.Glide
@@ -24,8 +25,86 @@ import edu.cs371m.reddit.glide.Glide
 //
 // You can call adapterPosition to get the index of the selected item
 class PostRowAdapter(private val viewModel: MainViewModel,
-                     private val navigateToOnePost: (RedditPost)->Unit )
+                     private val navigateToOnePost: (redditPost: RedditPost)->Unit )
     : ListAdapter<RedditPost, PostRowAdapter.VH>(RedditDiff()) {
+    inner class VH(val rowPostBinding: RowPostBinding)
+        : RecyclerView.ViewHolder(rowPostBinding.root) {
+        //init {}
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val rowBinding = RowPostBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false)
+        return VH(rowBinding)
+    }
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        //Log.d(javaClass.simpleName,"VH called with position: $position; currentIndex: ${viewModel.currentIndex}")
+        val postInfo = getItem(position)
+        val rowBinding = holder.rowPostBinding
+        rowBinding.title.text = postInfo.title
+        if (postInfo.selfText.isNullOrBlank()) {
+            rowBinding.selfText.text = ""
+            rowBinding.selfText.visibility = View.GONE
+        } else {
+            rowBinding.selfText.text = postInfo.selfText
+            rowBinding.selfText.visibility = View.VISIBLE
+        }
+        Glide.glideFetch(postInfo.imageURL, postInfo.thumbnailURL, rowBinding.image)
+        rowBinding.score.text = postInfo.score.toString()
+        rowBinding.comments.text = postInfo.commentCount.toString()
+
+        // setOnClickListener()
+        rowBinding.title.setOnClickListener() {
+            navigateToOnePost(postInfo)
+        }
+        rowBinding.selfText.setOnClickListener() {
+            navigateToOnePost(postInfo)
+        }
+        rowBinding.image.setOnClickListener() {
+            navigateToOnePost(postInfo)
+        }
+
+        viewModel.getFavoriteRedditPosts()?.let {
+            if (it.containsKey(postInfo.key)) {
+                rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
+            }
+        }
+
+        /*
+        if (viewModel.getFavoriteRedditPosts().containsKey(postInfo.key)) {
+            rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
+        }
+         */
+
+        rowBinding.rowFav.setOnClickListener() {
+            Log.d(javaClass.simpleName, ">>> rowFav setOnClickListener")
+            viewModel.getFavoriteRedditPosts()?.let { map ->
+                val containsPost = map.contains(postInfo.key)
+                if (containsPost) {
+                    viewModel.setFavoriteRedditPost(postInfo, false)
+                    rowBinding.rowFav.setImageResource(MainActivity.unfavoriteDrawable)
+                } else {
+                    Log.d(javaClass.simpleName, ">>> Make post favorite")
+                    viewModel.setFavoriteRedditPost(postInfo, true)
+                    rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
+                }
+            }
+
+            /*
+            if (viewModel.getFavoriteRedditPosts().contains(postInfo.key)) {
+                viewModel.setFavoriteRedditPost(postInfo, false)
+                rowBinding.rowFav.setImageResource(MainActivity.unfavoriteDrawable)
+            } else {
+                viewModel.setFavoriteRedditPost(postInfo, true)
+                rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
+            }
+             */
+        }
+    }
+
     class RedditDiff : DiffUtil.ItemCallback<RedditPost>() {
         override fun areItemsTheSame(oldItem: RedditPost, newItem: RedditPost): Boolean {
             return oldItem.key == newItem.key

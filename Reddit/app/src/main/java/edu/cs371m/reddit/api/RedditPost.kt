@@ -33,7 +33,10 @@ data class RedditPost (
     @SerializedName("icon_img")
     val iconURL: String?,
     @SerializedName("public_description")
-    val publicDescription: SpannableString?
+    val publicDescription: SpannableString?,
+    // Per https://edstem.org/us/courses/52967/discussion/4588565
+    @SerializedName("subreddit")
+    val subreddit: String
 ): Serializable {
     companion object {
         // NB: This only highlights the first match in a string
@@ -83,6 +86,52 @@ data class RedditPost (
     fun searchFor(searchTerm: String): Boolean {
         // XXX Write me, search both regular posts and subreddit listings,
         // which you determine by if(displayName.isNullOrEmpty()) {
+        removeAllCurrentSpans()
+        if (searchTerm.isEmpty()) return true
+        if (displayName.isNullOrEmpty()) {
+            // Search Post
+            val titleIndex = title.indexOf(searchTerm, ignoreCase = true)
+            val selfTextIndex = selfText?.indexOf(searchTerm, ignoreCase = true) ?: -1
+            if (titleIndex == -1 && selfTextIndex == -1) return false
+            if (titleIndex != -1) {
+                title.setSpan(
+                    ForegroundColorSpan(Color.CYAN),
+                    titleIndex,
+                    titleIndex + searchTerm.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            if (selfTextIndex != -1) {
+                selfText?.setSpan(
+                    ForegroundColorSpan(Color.CYAN),
+                    selfTextIndex,
+                    selfTextIndex + searchTerm.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        } else {
+            // Search Subreddit
+            val displayNameIndex = displayName.indexOf(searchTerm, ignoreCase = true)
+            val publicDescriptionIndex = publicDescription?.indexOf(searchTerm, ignoreCase = true) ?: -1
+            if (displayNameIndex == -1 && publicDescriptionIndex == -1) return false
+            if (displayNameIndex != -1) {
+                displayName.setSpan(
+                    ForegroundColorSpan(Color.CYAN),
+                    displayNameIndex,
+                    displayNameIndex + searchTerm.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+            if (publicDescriptionIndex != -1) {
+                publicDescription?.setSpan(
+                    ForegroundColorSpan(Color.CYAN),
+                    publicDescriptionIndex,
+                    publicDescriptionIndex + searchTerm.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
+        return true
     }
 
     // NB: This changes the behavior of lists of RedditPosts.  I want posts fetched

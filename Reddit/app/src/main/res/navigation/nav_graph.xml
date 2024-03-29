@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/nav_graph"
         app:startDestination="@id/homeFragment">
 
     <fragment
             android:id="@+id/homeFragment"
             android:name="edu.cs371m.reddit.ui.HomeFragment"
-            android:label="Home" >
+            android:label="Home Fragment"
+            tools:layout="@layout/content_main" >
         <action
                 android:id="@+id/action_homeFragment_to_subreddits"
                 app:destination="@id/subreddits" />
@@ -21,8 +23,29 @@
     <fragment
             android:id="@+id/subreddits"
             android:name="edu.cs371m.reddit.ui.subreddits.Subreddits"
-            android:label="Subreddits" />
+            android:label="Subreddits"
+            tools:layout="@layout/fragment_rv" />
     <!--Add "@+id/favorites" and "@+id/onePostFragment" -->
+    <fragment
+        android:id="@+id/favorites"
+        android:name="edu.cs371m.reddit.ui.Favorites"
+        android:label="Favorites"
+        tools:layout="@layout/fragment_rv" >
+        <action
+            android:id="@+id/action_favoritesFragment_to_onePostFragment"
+            app:destination="@id/onePostFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onePostFragment"
+        android:name="edu.cs371m.reddit.ui.OnePostFragment"
+        android:label="One Post"
+        tools:layout="@layout/fragment_one_post" >
+        <argument
+            android:name="post"
+            app:argType="edu.cs371m.reddit.api.RedditPost" />
+    </fragment>
+
     <!--Also, an action from favorites to OnePost -->
     <!--OnePost takes a "post" argument of type "edu.cs371m.reddit.api.RedditPost"-->
 </navigation>
