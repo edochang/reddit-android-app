@@ -32,6 +32,7 @@ class OnePostFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val post = args.post
+        viewModel.setTitle("One Post")
         viewModel.hideActionBarFavorites()
         /*
         viewModel.observeSubreddit().observe(viewLifecycleOwner) {
@@ -39,7 +40,21 @@ class OnePostFragment : Fragment(){
         }
          */
         binding.onePostSubreddit.text = String.format("r/%s", post.subreddit)
+        binding.onePostTitle.text = post.title
+
+        if (post.selfText.isNullOrBlank()) {
+            binding.onePostSelfText.text = ""
+            binding.onePostSelfText.visibility = View.GONE
+        } else {
+            binding.onePostSelfText.text = post.selfText
+            binding.onePostSelfText.visibility = View.VISIBLE
+        }
+
+        //binding.onePostSelfText.text = post.selfText
+
         Glide.glideFetch(post.imageURL, post.thumbnailURL, binding.onePostImage)
+
+        Log.d(javaClass.simpleName, "Image URLs: ${post.imageURL}, ${post.thumbnailURL}")
 
         viewModel.observeSearchTerm().observe(viewLifecycleOwner) {
             post.searchFor(it)

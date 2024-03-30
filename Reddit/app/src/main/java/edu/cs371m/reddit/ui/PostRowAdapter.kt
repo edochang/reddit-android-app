@@ -67,31 +67,28 @@ class PostRowAdapter(private val viewModel: MainViewModel,
             navigateToOnePost(postInfo)
         }
 
-        viewModel.getFavoriteRedditPosts()?.let {
-            if (it.containsKey(postInfo.key)) {
+        viewModel.isFavoriteRedditPost(postInfo)?.let{
+            if (it) {
+                Log.d(javaClass.simpleName, ">>> Make post favorite on bind: ${postInfo.key}")
                 rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
+            } else {
+                rowBinding.rowFav.setImageResource(MainActivity.unfavoriteDrawable)
             }
         }
 
-        /*
-        if (viewModel.getFavoriteRedditPosts().containsKey(postInfo.key)) {
-            rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
-        }
-         */
-
         rowBinding.rowFav.setOnClickListener() {
             Log.d(javaClass.simpleName, ">>> rowFav setOnClickListener")
-            viewModel.getFavoriteRedditPosts()?.let { map ->
-                val containsPost = map.contains(postInfo.key)
-                if (containsPost) {
+            viewModel.isFavoriteRedditPost(postInfo)?.let{
+                if (it) {
                     viewModel.setFavoriteRedditPost(postInfo, false)
                     rowBinding.rowFav.setImageResource(MainActivity.unfavoriteDrawable)
                 } else {
-                    Log.d(javaClass.simpleName, ">>> Make post favorite")
+                    Log.d(javaClass.simpleName, ">>> Make post favorite on click: ${postInfo.key}")
                     viewModel.setFavoriteRedditPost(postInfo, true)
                     rowBinding.rowFav.setImageResource(MainActivity.favoriteDrawable)
                 }
             }
+
 
             /*
             if (viewModel.getFavoriteRedditPosts().contains(postInfo.key)) {

@@ -72,7 +72,6 @@ class HomeFragment: Fragment() {
             val title = String.format("r/%s", it)
             viewModel.setTitle(title)
         }
-        viewModel.repoFetch()
 
         val layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.layoutManager = layoutManager

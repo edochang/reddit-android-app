@@ -15,6 +15,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.snackbar.Snackbar
 import edu.cs371m.reddit.databinding.ActionBarBinding
 import edu.cs371m.reddit.databinding.ActivityMainBinding
 import edu.cs371m.reddit.ui.HomeFragmentDirections
@@ -159,6 +160,18 @@ class MainActivity : AppCompatActivity() {
         actionBarTitleLaunchSubreddit()
         actionBarLaunchFavorites()
         actionBarSearch()
+
+        viewModel.repoFetch()
+
+        viewModel.fetch429.observe(this) {
+            if (it) {
+                Snackbar.make(
+                    activityMainBinding.root,
+                    "HTTP request failed. Try Again!",
+                    Snackbar.LENGTH_SHORT).show()
+                viewModel.fetch429.value = false
+            }
+        }
 
         // Set up our nav graph
         val navHostFragment = supportFragmentManager.findFragmentById(

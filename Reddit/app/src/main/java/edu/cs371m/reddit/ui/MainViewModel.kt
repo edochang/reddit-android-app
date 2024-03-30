@@ -33,6 +33,7 @@ class MainViewModel : ViewModel() {
     private val redditAPI = RedditApi.create()
     private val redditPostRepository = RedditPostRepository(redditAPI)
     var fetchDone: MutableLiveData<Boolean> = MutableLiveData(false)
+    val fetch429: MutableLiveData<Boolean> = MutableLiveData(false)
 
     //private val favoriteRedditPosts = mutableMapOf<String, RedditPost>()
     private val favoriteRedditPosts = MutableLiveData<Map<String, RedditPost>>().apply {
@@ -42,8 +43,13 @@ class MainViewModel : ViewModel() {
     private var netSubreddits = MutableLiveData<List<RedditPost>>().apply {
         // XXX Write me, viewModelScope.launch getSubreddits()
         viewModelScope.launch(context = viewModelScope.coroutineContext + Dispatchers.IO) {
-            Log.d(javaClass.simpleName, "Calling netSubreddits...")
-            postValue(redditPostRepository.getSubreddits())
+            try {
+                Log.d(javaClass.simpleName, "Calling netSubreddits...")
+                postValue(redditPostRepository.getSubreddits())
+            } catch (e: Exception) {
+                Log.d(javaClass.simpleName, "HTTP request failed. Try again!")
+                fetch429.postValue(true)
+            }
         }
     }
     // netPosts fetches the posts for the current subreddit, when that
@@ -52,9 +58,16 @@ class MainViewModel : ViewModel() {
         addSource(subreddit) { subreddit: String ->
             Log.d("repoPosts", subreddit)
             // XXX Write me, viewModelScope.launch getPosts
-            Log.d(javaClass.simpleName, "Calling netPosts with $subreddit...")
             viewModelScope.launch(context = viewModelScope.coroutineContext + Dispatchers.IO) {
-                postValue(redditPostRepository.getPosts(subreddit))
+                try {
+                    Log.d(javaClass.simpleName, "Calling netPosts with $subreddit...")
+                    postValue(redditPostRepository.getPosts(subreddit))
+                } catch (e: Exception) {
+                    Log.d(javaClass.simpleName, "HTTP request failed. Try again!")
+                    fetch429.postValue(true)
+                    fetchDone.postValue(true)
+                    postValue(emptyList())
+                }
             }
         }
     }
@@ -122,7 +135,7 @@ class MainViewModel : ViewModel() {
 
     private fun searchFavoriteList(): List<RedditPost> {
         val searchTermValue = searchTerm.value ?: ""
-        return favoriteRedditPosts.value?.values?.toList()?.filter {
+        return favoriteRedditPosts.value?.values?.filter {
             it.searchFor(searchTermValue)
         } ?: emptyList()
     }
@@ -156,6 +169,10 @@ class MainViewModel : ViewModel() {
     fun getFavoriteRedditPosts(): Map<String, RedditPost>? {
         //Log.d(javaClass.simpleName, ">>> ${favoriteRedditPosts.value}")
         return favoriteRedditPosts.value
+    }
+
+    fun isFavoriteRedditPost(post: RedditPost): Boolean? {
+        return favoriteRedditPosts.value?.containsKey(post.key)
     }
 
     fun observeLiveFavoriteRedditPosts(): LiveData<List<RedditPost>> {
