@@ -49,7 +49,7 @@ class SubredditListAdapter(private val viewModel: MainViewModel,
         }
 
         subreddit.iconURL?.let {
-            Glide.glideFetch(subreddit.iconURL, "", rowBinding.subRowPic)
+            Glide.glideFetch(subreddit.iconURL, subreddit.iconURL, rowBinding.subRowPic)
         }
         rowBinding.subRowHeading.text = subreddit.displayName
         rowBinding.subRowDetails.text = subreddit.publicDescription

@@ -46,7 +46,7 @@
         android:id="@+id/onePostImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top"
+        android:layout_gravity="center_horizontal"
         android:contentDescription="Reddit_Post_Image"
         android:scaleType="fitCenter" />
 

@@ -35,10 +35,14 @@ class MainViewModel : ViewModel() {
     var fetchDone: MutableLiveData<Boolean> = MutableLiveData(false)
     val fetch429: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    //private val favoriteRedditPosts = mutableMapOf<String, RedditPost>()
+    private val favoriteRedditPosts = MutableLiveData<List<RedditPost>>().apply {
+        postValue(mutableListOf())
+    }
+    /*
     private val favoriteRedditPosts = MutableLiveData<Map<String, RedditPost>>().apply {
         postValue(mutableMapOf())
     }
+     */
 
     private var netSubreddits = MutableLiveData<List<RedditPost>>().apply {
         // XXX Write me, viewModelScope.launch getSubreddits()
@@ -135,9 +139,14 @@ class MainViewModel : ViewModel() {
 
     private fun searchFavoriteList(): List<RedditPost> {
         val searchTermValue = searchTerm.value ?: ""
+        return favoriteRedditPosts.value?.filter {
+            it.searchFor(searchTermValue)
+        } ?: emptyList()
+        /*
         return favoriteRedditPosts.value?.values?.filter {
             it.searchFor(searchTermValue)
         } ?: emptyList()
+         */
     }
 
     private var searchFavorites = MediatorLiveData<List<RedditPost>>().apply{
@@ -166,13 +175,16 @@ class MainViewModel : ViewModel() {
     }
 
     // XXX Write me, set, observe, deal with favorites
+    /*
     fun getFavoriteRedditPosts(): Map<String, RedditPost>? {
         //Log.d(javaClass.simpleName, ">>> ${favoriteRedditPosts.value}")
         return favoriteRedditPosts.value
     }
+     */
 
     fun isFavoriteRedditPost(post: RedditPost): Boolean? {
-        return favoriteRedditPosts.value?.containsKey(post.key)
+        return favoriteRedditPosts.value?.contains(post)
+        //return favoriteRedditPosts.value?.containsKey(post.key)
     }
 
     fun observeLiveFavoriteRedditPosts(): LiveData<List<RedditPost>> {
@@ -184,8 +196,10 @@ class MainViewModel : ViewModel() {
             // Add favorite post
             favoriteRedditPosts.apply {
                 this.value?.let {
-                    val tempFavoriteRedditPosts = it.toMutableMap()
-                    tempFavoriteRedditPosts[redditPost.key] = redditPost
+                    val tempFavoriteRedditPosts = it.toMutableList()
+                    tempFavoriteRedditPosts.add(redditPost)
+                    //val tempFavoriteRedditPosts = it.toMutableMap()
+                    //tempFavoriteRedditPosts[redditPost.key] = redditPost
                     this.value = tempFavoriteRedditPosts
                 }
             }
@@ -193,8 +207,10 @@ class MainViewModel : ViewModel() {
             // Remove favorite post
             favoriteRedditPosts.apply {
                 this.value?.let {
-                    val tempFavoriteRedditPosts = it.toMutableMap()
-                    tempFavoriteRedditPosts.remove(redditPost.key)
+                    val tempFavoriteRedditPosts = it.toMutableList()
+                    tempFavoriteRedditPosts.remove(redditPost)
+                    //val tempFavoriteRedditPosts = it.toMutableMap()
+                    //tempFavoriteRedditPosts.remove(redditPost.key)
                     this.value = tempFavoriteRedditPosts
                 }
             }

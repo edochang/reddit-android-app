@@ -28,12 +28,12 @@ class HomeFragment: Fragment() {
                     if (it.title.length > 32)
                         it.title.substring(0, 31) + "..."
                     else it.title))
-            Log.d("doOnePost", "image ${it.imageURL}")
+            //Log.d("doOnePost", "image ${it.imageURL}")
             // XXX Write me
             val direction = HomeFragmentDirections.actionHomeFragmentToOnePostFragment(it)
             findNavController().navigate(direction)
 
-            Log.d("doOnePost", "RedditPost: $it")
+            //Log.d("doOnePost", "RedditPost: $it")
         }
         // XXX Write me, observe posts
         binding.recyclerView.adapter = postRowAdapter
