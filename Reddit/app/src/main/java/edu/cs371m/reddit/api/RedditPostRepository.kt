@@ -26,7 +26,7 @@ class RedditPostRepository(private val redditApi: RedditApi) {
                 RedditApi.ListingResponse::class.java)
         } else {
             // XXX Write me.
-            return unpackPosts(redditApi.getPosts(subreddit))
+            response = redditApi.getPosts(subreddit)
         }
         return unpackPosts(response!!)
     }
