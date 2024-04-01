@@ -87,34 +87,32 @@ class MainActivity : AppCompatActivity() {
     // XXX check out addTextChangedListener
     private fun actionBarSearch() {
         // XXX Write me
-        actionBarBinding?.let { actionBarBinding ->
-            actionBarBinding.actionSearch.addTextChangedListener(
-                object: TextWatcher {
-                    override fun beforeTextChanged(
-                        s: CharSequence?,
-                        start: Int,
-                        count: Int,
-                        after: Int
-                    ) {
-                        // not used
-                    }
-
-                    override fun onTextChanged(
-                        s: CharSequence,
-                        start: Int,
-                        before: Int,
-                        count: Int
-                    ) {
-                        if (s.isEmpty()) hideKeyboard()
-                        viewModel.setSearchTerm(s.toString())
-                    }
-
-                    override fun afterTextChanged(s: Editable?) {
-                        // not used
-                    }
+        actionBarBinding?.actionSearch?.addTextChangedListener(
+            object: TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                    // not used
                 }
-            )
-        }
+
+                override fun onTextChanged(
+                    s: CharSequence,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    if (s.isEmpty()) hideKeyboard()
+                    viewModel.setSearchTerm(s.toString())
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    // not used
+                }
+            }
+        )
     }
 
     private fun initDebug() {
@@ -148,6 +146,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initDebug()
         val activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
         setSupportActionBar(activityMainBinding.toolbar)
@@ -155,7 +154,6 @@ class MainActivity : AppCompatActivity() {
             initActionBar(it)
         }
 
-        initDebug()
         initTitleObservers()
         actionBarTitleLaunchSubreddit()
         actionBarLaunchFavorites()

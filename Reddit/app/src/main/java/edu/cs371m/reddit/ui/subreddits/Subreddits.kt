@@ -36,6 +36,12 @@ class Subreddits : Fragment(R.layout.fragment_rv) {
         viewModel.observeLiveSubreddits().observe(viewLifecycleOwner) {
             subredditListAdapter.submitList(it)
         }
+
+        /*
+        if (subredditListAdapter.currentList.isEmpty()) {
+            viewModel.setNetSubreddits()
+        }
+         */
     }
 
     override fun onDestroyView() {

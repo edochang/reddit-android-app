@@ -51,8 +51,8 @@ class MainViewModel : ViewModel() {
                 Log.d(javaClass.simpleName, "Calling netSubreddits...")
                 postValue(redditPostRepository.getSubreddits())
             } catch (e: Exception) {
-                Log.d(javaClass.simpleName, "HTTP request failed. Try again!")
-                fetch429.postValue(true)
+                Log.w(javaClass.simpleName, "HTTP request failed.")
+                Log.d(javaClass.simpleName, "Error: $e")
             }
         }
     }
@@ -112,6 +112,25 @@ class MainViewModel : ViewModel() {
     fun setSearchTerm(s: String) {
         searchTerm.value = s
     }
+
+    /*
+    fun setNetSubreddits() {
+        viewModelScope.launch(context = viewModelScope.coroutineContext + Dispatchers.IO) {
+            try {
+                val netSubredditsIsEmpty = netSubreddits.value?.isEmpty() ?: true
+                if (netSubredditsIsEmpty) {
+                    Log.d(javaClass.simpleName, "Calling netSubreddits...")
+                    netSubreddits.postValue(redditPostRepository.getSubreddits())
+                } else {
+                    Log.d(javaClass.simpleName, "netSubreddits is not empty, so do not set")
+                }
+            } catch (e: Exception) {
+                Log.w(javaClass.simpleName, "HTTP request failed.")
+                Log.d(javaClass.simpleName, "Error: $e")
+            }
+        }
+    }
+     */
 
     private fun searchSubredditList(): List<RedditPost> {
         val searchTermValue = searchTerm.value ?: ""
